@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/lordexetor/matrixmultiplicationjs#readme",
   "dependencies": {
-    "commander": "^2.15.1"
+    "commander": "^2.15.1",
+    "zeromq": "^4.6.0"
   }
 }

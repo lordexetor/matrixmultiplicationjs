@@ -1,3 +1,5 @@
+var Client = require('./client/client');
+var Server = require('./server/server');
 var program = require('commander');
  
 program
@@ -6,7 +8,21 @@ program
   .option('-w, --worker', 'Start a worker')
   .option('-c, --client', 'Start a client')
   .parse(process.argv);
- 
-if (program.server) console.log('server started');
-if (program.worker) console.log('worker started');
-if (program.client) console.log('client started');
+  
+if (program.client) startClient();
+if (program.server) startServer();
+if (program.worker) startWorker();
+
+function startClient() {
+    var client = new Client();
+    console.log('client started');
+}
+
+function startServer() {
+    var server = new Server();
+    console.log('server started');
+}
+
+function startWorker() {
+    console.log('worker started');
+}
