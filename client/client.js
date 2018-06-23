@@ -18,6 +18,10 @@ module.exports = class Client {
         //   console.log('sending work');
         //   sock.send('some work');
         // }, 500);
+
+        sock.on('message', function(msg) {
+            console.log('answer received', msg.toString());
+        })
     }
 
     /**

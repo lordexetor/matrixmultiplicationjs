@@ -17,6 +17,22 @@ module.exports = class Matrix {
         this.values = values;
     }
 
+    /**
+     * Returns the values of the given column.
+     * @param {number} column the column whose values will be returned
+     * @returns {number[]} the array of column values    
+     */
+    getColumnValues(column) {
+        if (column < 0 || column >= this.columns) throw Error ('Column out of bounds: The matrix is too small.');
+        else {
+            let column_values = [];
+            this.values.forEach(row => {
+                column_values.push(row[column]);
+            });
+            return column_values;
+        }
+    }
+
     // /**
     //  * Constructor for a new empty matrix.
     //  * @param {number} rows Row count 

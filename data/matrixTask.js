@@ -1,31 +1,31 @@
 module.exports = class MatrixTask {
-   /**  
-    *   The index of the row from the matrix 
-    *   @type {number}
-    */
-    indexRow;
-   /**  
-    *   The index of the column from the matrix 
-    *   @type {number}
-    */
-    indexColumn;
-   /**  
-    *   The values of the row from the matrix 
-    *   @type {number[]}
-    */
-    valuesRow;
-   /**  
-    *   The values of the column from the matrix 
-    *   @type {number[]}
-    */
-    valuesColumn;
+//    /**  
+//     *   The index of the row from the matrix 
+//     *   @type {number}
+//     */
+//     indexRow;
+//    /**  
+//     *   The index of the column from the matrix 
+//     *   @type {number}
+//     */
+//     indexColumn;
+//    /**  
+//     *   The values of the row from the matrix 
+//     *   @type {number[]}
+//     */
+//     valuesRow;
+//    /**  
+//     *   The values of the column from the matrix 
+//     *   @type {number[]}
+//     */
+//     valuesColumn;
 
-    /**
-    * Default constructor
-    */
-    constructor() {
+    // /**
+    // * Default constructor
+    // */
+    // constructor() {
        
-    }
+    // }
     /**
     Constructor for a MatrixTask to be solved
      */
