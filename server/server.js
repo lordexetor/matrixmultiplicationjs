@@ -1,19 +1,35 @@
 let zmq = require('zeromq')
-  , sock = zmq.socket('rep');
+  , sock_clientRouter = zmq.socket('router')
+  , sock_dlr = zmq.socket('dealer');
 let Matrix = require('../data/matrix');
 let MatrixTask = require('../data/matrixTask');
 let PartialProblem = require('../data/partialProblem');
+let PartialSolution = require('../data/partialSolution');
 
 /**
  * Decodes two stringified matrices.
  * @param {Buffer} clientProblem Two matrices stringified as A_values#B_values 
  */
-let decodeProblem = function(clientProblem) {
-    let encodedMatrices = clientProblem.toString().split("#");
+let decodeProblem = function(encodedClientProblem) {
+    let encodedMatrices = encodedClientProblem.toString().split("#");
     let A = new Matrix(JSON.parse(encodedMatrices[0]));
     let B = new Matrix(JSON.parse(encodedMatrices[1]));
     console.log('Matrices', A, B);
     return [A,B];
+}
+
+/**
+ * Decodes an encoded partial solution
+ * @param {Buffer} encodedPartialSolution The encoded partial solution
+ * @returns {PartialSolution} the decoded partial solution
+ */
+let decodePartialSolution = function(encodedPartialSolution) {
+    console.log(encodedPartialSolution.toString());
+    let params = encodedPartialSolution.toString().split('#');
+    if (params.length !== 3) throw Error ('Invalid partial solution');
+    else {
+        return new PartialSolution(params[0], params[1], params[2]);
+    }
 }
 
 /**
@@ -46,12 +62,15 @@ let createPartialProblems = function(A, B) {
  * @returns {boolean} true, if the column count of the first matrix equals the row count of the second matrix
  */
 let validateMatrices = function(A, B) {
-    const columnsA = A.values[0].length;
-    const rowsB = B.values.length;
-    if (columnsA === rowsB) return true;
+    if (A.columns === B.rows) return true;
     else return false;
 }
 
+/**
+ * A Server for MatrixMultiplication
+ * @typedef {Object} Server
+ * @property {PartialProblem[]} partialProblems the partial problems generated from the client problem
+ */
 module.exports = class Server {
 
     // /** The row and column count at which the matrices will be split. */
@@ -65,20 +84,60 @@ module.exports = class Server {
     /**
      */
     constructor() {
-        sock.connect('tcp://127.0.0.1:3000');
-        console.log('Server connected to port 3000');
+        this.availableWorkers = [];
+        this.partialProblems = [];
 
-        sock.on('message', function(msg) {
-            const matrices = decodeProblem(msg);
-            const A = matrices[0];
-            const B = matrices[1];
-            if (validateMatrices(A, B)) {
-                this.partialProblems = createPartialProblems(A, B);
-            } else {
-                throw Error('Matrices are not compatible!')
-            }
-            sock.send('solution');
+        sock_clientRouter.bind('tcp://localhost:3000');
+        console.log('Server connected to port 3000 for client requests');
+
+        sock_dlr.bind('tcp://localhost:3001');
+        console.log('Server connected to port 3001 for worker tasks');
+
+        sock_clientRouter.on('message', (msg) => {
+            sock_clientRouter.send('Server is listening');
+            // this.partialProblems = this.onReceiveClientProblem(msg)
+            // this.distributePartialProblems();
         });
+
+        sock_dlr.on('message', (msg) => {
+            this.onReceivePartialSolution(msg)
+        });
+    }
+
+    /**
+     * When receiving a problem from a client, decode it, then validate the problem and create the partial problems from it.
+     * Distribute the partial problems to the workers.
+     * @param {*} msg The Problem, consisting of two matrices to be multiplied
+     */
+    onReceiveClientProblem(msg) {
+        const matrices = decodeProblem(msg);
+        const A = matrices[0];
+        const B = matrices[1];
+        if (validateMatrices(A, B)) {
+            return createPartialProblems(A, B);
+        } else {
+            throw Error('Matrices are not compatible!')
+        }
+    }
+
+    onReceivePartialSolution(msg) {
+        console.log('received', decodePartialSolution(msg));
+    }
+  
+    /**
+     * While there are unsolved partial problems, send them to the workers.
+     * TODO: when the worker fails, keep the partial problems somewhere
+     */
+    distributePartialProblems() {
+        if (this.partialProblems.length > 0) {
+            console.log('distributing partial problems ...');
+            let s = this.partialProblems[0].stringify();
+            console.log(s);
+            sock_dlr.send(s);
+            // this.partialProblems.forEach(p => {
+            //     sock_dlr.send(p.stringify());
+            // });
+        }
     }
 
  

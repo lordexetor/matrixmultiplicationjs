@@ -5,8 +5,8 @@ var zmq = require('zeromq')
 module.exports = class Client {
     constructor() {
 
-        sock.bindSync('tcp://127.0.0.1:3000');
-        console.log('Producer bound to port 3000');
+        sock.connect('tcp://localhost:3000');
+        console.log('Connected to Server (Router) on port 3000');
         
         var A = new Matrix([[1,2,3],[4,5,6]]);
         var B = new Matrix([[2,1],[2,2],[3,1]]);

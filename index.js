@@ -1,5 +1,6 @@
 var Client = require('./client/client');
 var Server = require('./server/server');
+var Worker = require('./worker/worker');
 var program = require('commander');
  
 /**
@@ -39,5 +40,6 @@ function startServer() {
  * Starts a new worker that solves a small problem.
  */
 function startWorker() {
+    var worker = new Worker();
     console.log('worker started');
 }
